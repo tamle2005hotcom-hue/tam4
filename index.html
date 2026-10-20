@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZICK TECH // APP CONTROL</title>
+  <style>
+    :root {
+      --bg: #060a0f;
+      --panel: rgba(9, 16, 22, 0.72);
+      --line: rgba(90, 255, 180, 0.5);
+      --green: #60ffb4;
+      --green-strong: #00ff88;
+      --cyan: #7adfff;
+      --text: #ecfff7;
+      --muted: #9bb8ae;
+      --warn: #ffc857;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: "Consolas", "Segoe UI", monospace;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      letter-spacing: 0.2px;
+    }
+
+    /* Ảnh nền toàn màn hình */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: url("bg.png") center center / cover no-repeat;
+      filter: brightness(0.38) contrast(1.12) saturate(0.85) blur(1px);
+      z-index: 0;
+      transform: scale(1.04);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.48)),
+        radial-gradient(circle at center, rgba(0,0,0,0.2), rgba(0,0,0,0.7));
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      width: min(92vw, 460px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 0 30px rgba(0,255,170,0.12),
+        inset 0 0 18px rgba(255,255,255,0.025);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
+
+    .app-shell::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(140, 255, 210, 0.15);
+      border-radius: 10px;
+      pointer-events: none;
+    }
+
+    .top-visual {
+      position: relative;
+      height: 180px;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(96, 255, 180, 0.35);
+      background: linear-gradient(180deg, rgba(7,18,26,0.35), rgba(3,5,9,0.75));
+    }
+
+    .top-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.1) contrast(1.08) brightness(0.78);
+    }
+
+    .top-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.58));
+    }
+
+    .status-bar {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--green);
+      text-shadow: 0 0 8px rgba(96,255,180,0.8);
+    }
+
+    .header-text {
+      position: absolute;
+      left: 16px;
+      bottom: 18px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .brand-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-block h1 {
+      font-size: clamp(1.4rem, 3vw, 2.1rem);
+      letter-spacing: 3px;
+      color: var(--green);
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(96,255,180,0.75);
+    }
+
+    .brand-block p {
+      font-size: 9px;
+      color: #dbe9e0;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .admin-pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--green);
+      background: rgba(96,255,180,0.08);
+      color: var(--green);
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .content {
+      padding: 18px 16px 16px;
+    }
+
+    .features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .feature-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(104, 255, 178, 0.18);
+      background: rgba(255,255,255,0.015);
+      transition: 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-row.active {
+      background: rgba(96,255,180,0.05);
+      border-color: rgba(96,255,180,0.7);
+      box-shadow: inset 0 0 12px rgba(96,255,180,0.08);
+    }
+
+    .feature-row::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(96,255,180,0.08), transparent);
+      opacity: 0;
+      transition: 0.2s ease;
+    }
+
+    .feature-row.active::before {
+      opacity: 1;
+    }
+
+    .feature-info {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .feature-info h3 {
+      color: #f0fff5;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .feature-info p {
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .switch {
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      width: 42px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: rgba(40, 52, 58, 0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: 0.2s ease;
+      cursor: pointer;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      top: 3px;
+      left: 3px;
+      border-radius: 50%;
+      background: #8c98a4;
+      transition: 0.2s ease;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+
+    input:checked + .slider {
+      background: rgba(96,255,180,0.12);
+      border-color: rgba(96,255,180,0.7);
+      box-shadow: 0 0 14px rgba(96,255,180,0.12);
+    }
+
+    input:checked + .slider::before {
+      transform: translateX(20px);
+      background: var(--green-strong);
+      box-shadow: 0 0 12px rgba(96,255,180,0.9);
+    }
+
+    .start-btn-wrap {
+      margin-bottom: 16px;
+    }
+
+    .start-btn {
+      width: 100%;
+      padding: 14px 12px;
+      border: 1px solid var(--green);
+      border-radius: 8px;
+      background: rgba(96,255,180,0.08);
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.25s ease;
+      box-shadow: 0 0 18px rgba(96,255,180,0.14);
+    }
+
+    .start-btn:hover {
+      background: var(--green);
+      color: #07110d;
+      box-shadow: 0 0 24px rgba(96,255,180,0.5);
+    }
+
+    .terminal-box {
+      background: rgba(5, 9, 14, 0.9);
+      border: 1px solid rgba(122,223,255,0.25);
+      border-radius: 8px;
+      padding: 10px 12px 12px;
+      box-shadow: inset 0 0 18px rgba(0,0,0,0.8);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 9px;
+      color: var(--green);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid rgba(122,223,255,0.22);
+    }
+
+    .terminal-log {
+      max-height: 170px;
+      overflow-y: auto;
+      font-size: 10px;
+      line-height: 1.6;
+      color: #d7f7e7;
+    }
+
+    .terminal-log::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .terminal-log::-webkit-scrollbar-thumb {
+      background: rgba(96,255,180,0.35);
+      border-radius: 999px;
+    }
+
+    .log-line {
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .log-success { color: var(--green); }
+    .log-info { color: var(--cyan); }
+    .log-warn { color: var(--warn); }
+
+    @media (max-width: 430px) {
+      .top-visual {
+        height: 150px;
+      }
+
+      .header-text {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .admin-pill {
+        margin-top: 2px;
+      }
+
+      .feature-info h3 {
+        font-size: 12px;
+      }
+
+      .feature-info p {
+        font-size: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="top-visual">
+      <img src="banner.png" alt="banner">
+      <div class="top-overlay"></div>
+
+      <div class="status-bar">
+        <span>SYS ONLINE</span>
+        <span>v2.7.04</span>
+      </div>
+
+      <div class="header-text">
+        <div class="brand-block">
+          <h1>ZICK TECH</h1>
+          <p>System Injector // Stable Config</p>
+        </div>
+        <div class="admin-pill">Admin #taamle</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="features-list">
+        <div class="feature-row" id="row-nhe-tam">
+          <div class="feature-info">
+            <h3>Nhẹ Tâm</h3>
+            <p>Giảm ma sát tọa độ</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="nhe-tam" onchange="triggerCommand('nhe-tam', 'Nhẹ Tâm')">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="feature-row" id="row-fix-rung">
+          <div class="feature-info">
+            <h3>Fix Rung</h3>
+            <p>Khử lệch Jitter</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="fix-rung" onchange="triggerCommand('fix-rung', 'Fix Rung')">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="feature-row" id="row-aimlock">
+          <div class="feature-info">
+            <h3>Aimlock</h3>
+            <p>Khóa cứng mục tiêu</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="aimlock" onchange="triggerCommand('aimlock', 'Aimlock')">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="feature-row" id="row-bam-dau">
+          <div class="feature-info">
+            <h3>Bám Đầu</h3>
+            <p>Tự động bám vector</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="bam-dau" onchange="triggerCommand('bam-dau', 'Bám Đầu')">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="feature-row" id="row-buff-fps">
+          <div class="feature-info">
+            <h3>Buff FPS</h3>
+            <p>Tối ưu hóa khung hình</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="buff-fps" onchange="triggerCommand('buff-fps', 'Buff FPS')">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="feature-row" id="row-aim-head">
+          <div class="feature-info">
+            <h3>Aim Head</h3>
+            <p>Tập trung vùng quét sọ</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="aim-head" onchange="triggerCommand('aim-head', 'Aim Head')">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="start-btn-wrap">
+        <button class="start-btn" onclick="startExecution()">► Bắt đầu hệ thống</button>
+      </div>
+
+      <div class="terminal-box">
+        <div class="terminal-header">
+          <span>Live Script Output</span>
+          <span id="active-count">ACTIVE: 0/6</span>
+        </div>
+        <div class="terminal-log" id="terminal-log">
+          <div class="log-line log-info">[INFO] Đã xác nhận quyền Admin: #taamle</div>
+          <div class="log-line log-info">[INFO] Hệ thống sẵn sàng chạy mã khi bấm chức năng...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function triggerCommand(id, name) {
+      const checkbox = document.getElementById(id);
+      const row = document.getElementById('row-' + id);
+      const terminalLog = document.getElementById('terminal-log');
+      const timeStr = new Date().toLocaleTimeString();
+
+      if (checkbox.checked) {
+        row.classList.add('active');
+        terminalLog.innerHTML += `<div class="log-line log-info">[${timeStr}] [INJECT] Đang khởi chạy tiến trình: ${name}...</div>`;
+        setTimeout(() => {
+          terminalLog.innerHTML += `<div class="log-line log-success">[${timeStr}] [RUNNING] Code cho '${name}' đã được nạp thành công!</div>`;
+          terminalLog.scrollTop = terminalLog.scrollHeight;
+        }, 350);
+      } else {
+        row.classList.remove('active');
+        terminalLog.innerHTML += `<div class="log-line log-warn">[${timeStr}] [STOP] Đã dừng và giải phóng tiến trình: ${name}</div>`;
+      }
+
+      updateActiveCount();
+      terminalLog.scrollTop = terminalLog.scrollHeight;
+    }
+
+    function updateActiveCount() {
+      const checkedBoxes = document.querySelectorAll('.switch input[type="checkbox"]:checked');
+      document.getElementById('active-count').innerText = `ACTIVE: ${checkedBoxes.length}/6`;
+    }
+
+    function startExecution() {
+      const terminalLog = document.getElementById('terminal-log');
+      const timeStr = new Date().toLocaleTimeString();
+
+      terminalLog.innerHTML += `<div class="log-line log-info">[${timeStr}] [SYSTEM] Admin #taamle thực thi tổng lệnh hệ thống...</div>`;
+
+      const checkedBoxes = document.querySelectorAll('.switch input[type="checkbox"]:checked');
+
+      if (checkedBoxes.length === 0) {
+        terminalLog.innerHTML += `<div class="log-line log-warn">[${timeStr}] [WARN] Chưa có chức năng nào được kích hoạt!</div>`;
+      } else {
+        checkedBoxes.forEach(box => {
+          const featureName = box.parentElement.parentElement.querySelector('h3').innerText;
+          terminalLog.innerHTML += `<div class="log-line log-success">[${timeStr}] [ACTIVE] Xác nhận module '${featureName}' đang hoạt động ổn định.</div>`;
+        });
+      }
+
+      terminalLog.scrollTop = terminalLog.scrollHeight;
+    }
+
+    updateActiveCount();
+  </script>
+</body>
+</html>
